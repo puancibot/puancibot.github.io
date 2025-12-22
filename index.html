@@ -155,7 +155,7 @@
 
           li.innerHTML = `
             <div class="rank-badge">#${rank}</div>
-            <img src="${item.avatarUrl}" alt="${item.username}" loading="lazy">
+            <img src="${item.avatarUrl}" alt="${item.username}" loading="lazy" onload="this.style.objectFit = (this.naturalWidth > this.naturalHeight) ? 'cover' : 'contain'">
             <div class="username">${item.username}</div>
             <div class="score">${item.score} PUAN</div>
           `;
@@ -170,4 +170,3 @@
   </script>
 </body>
 </html>
-
