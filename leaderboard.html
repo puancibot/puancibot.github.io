@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --accent-color: #38bdf8;
+      --gold: #fbbf24;
+      --silver: #94a3b8;
+      --bronze: #b45309;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-weight: 800;
+      font-size: 2.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      max-width: 1200px;
+    }
+
+    /* Kart Tasarımı */
+    li {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    li:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Sıralama Rozeti */
+    .rank-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: rgba(255,255,255,0.5);
+      z-index: 2;
+    }
+
+    /* Avatar Stili */
+    img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid transparent;
+      margin-bottom: 15px;
+      background-color: #334155;
+    }
+
+    /* Kullanıcı Bilgileri */
+    .username {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .score {
+      font-size: 0.9rem;
+      color: var(--accent-color);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    /* İlk 3 Sıralama için Özel Efektler */
+    li.rank-1 img { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
+    li.rank-1 .rank-badge { color: var(--gold); }
+    
+    li.rank-2 img { border-color: var(--silver); }
+    li.rank-2 .rank-badge { color: var(--silver); }
+    
+    li.rank-3 img { border-color: var(--bronze); }
+    li.rank-3 .rank-badge { color: var(--bronze); }
+
+  </style>
+</head>
+<body>
+  
+  <h1>🏆 En iyiler Top 20</h1>
+  <p style="color: #aaa;">Not: Puanlar gerçek zamanlı olarak güncellenmektedir ve 22.12.2025 tarihinden sonraki puanlamalar için geçerlidir.</p>
+  <ul id="lb"></ul>
+
+  <script>
+    fetch("https://getleaderboard-khfbwz2saa-uc.a.run.app/")
+      .then(r => r.json())
+      .then(data => {
+        const ul = document.getElementById("lb");
+
+        // Veriyi puana göre sırala (Büyükten küçüğe) - API sıralı değilse diye
+        data.sort((a, b) => b.score - a.score);
+
+        data.forEach((item, index) => {
+          const li = document.createElement("li");
+          
+          // Sıralama numarasını hesapla (index 0'dan başlar, o yüzden +1)
+          const rank = index + 1;
+          
+          // İlk 3'e özel class ekle
+          if (rank === 1) li.classList.add("rank-1");
+          else if (rank === 2) li.classList.add("rank-2");
+          else if (rank === 3) li.classList.add("rank-3");
+
+          li.innerHTML = `
+            <div class="rank-badge">#${rank}</div>
+            <img src="${item.avatarUrl}" alt="${item.username}" loading="lazy">
+            <div class="username">${item.username}</div>
+            <div class="score">${item.score} PUAN</div>
+          `;
+          
+          ul.appendChild(li);
+        });
+      })
+      .catch(err => {
+        console.error("Veri çekilemedi:", err);
+        document.getElementById("lb").innerHTML = "<p style='color:red'>Veri yüklenirken hata oluştu.</p>";
+      });
+  </script>
+</body>
+</html>
