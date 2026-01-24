@@ -64,7 +64,7 @@
     searchInput.addEventListener('keydown', function(e) {
       if(e.key === 'Enter') {
         // Sayfayı yeniden yükleyerek arama sorgusunu güncelle
-        window.location.href = "leaderboard.html" + (searchInput.value ? "?q=" + encodeURIComponent(searchInput.value) : "");
+        window.location.href = window.location.pathname + (searchInput.value ? "?q=" + encodeURIComponent(searchInput.value) : "");
       }
     });
 
@@ -151,3 +151,4 @@
 
 </body>
 </html>
+
