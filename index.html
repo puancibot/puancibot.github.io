@@ -198,9 +198,19 @@
 <body>
   
   <h1>🏆 Lider Tablosu</h1>
-  <p class="info-text">Not: Puanlar gerçek zamanlı güncellenir. 22.12.2025 sonrası puanlamalar geçerlidir. <br> Ve sadece normal, realistic ve legacy mod puanları kaydediliyor.</p>
+  <p class="info-text">Not: Puanlar gerçek zamanlı güncellenir. 22.12.2025 sonrası normal mod puanlamalar geçerlidir. </p>
   <input type="text" id="username-search" value="" placeholder="Nick'e göre ara..." aria-label="Kullanıcı Ara">
   <div id="error-message"></div>
+  <div id="loading" style="
+    display:block;
+    margin: 20px 0;
+    color: #94a3b8;
+    font-weight: 600;
+    text-align: center;
+    ">
+    Yükleniyor...
+  </div>
+
   <ul id="lb"></ul>
 
   <small style="margin-top: 20px;color: #777;">This site is protected by reCAPTCHA and the Google 
@@ -242,7 +252,9 @@
     if(query) searchInput.value = query;
 
     async function fetchLeaderboard() {
-      // Yükleniyor mesajı (isteğe bağlı eklenebilir) veya placeholder
+      const loadingEl = document.getElementById("loading");
+        loadingEl.style.display = "block";
+
       
       try {
         const token = await getCaptchaToken("send_message");
@@ -306,8 +318,10 @@
         ul.innerHTML = ""; 
         ul.appendChild(fragment);
 
+        loadingEl.style.display = "none";
       } catch (err) {
         console.error("Hata:", err);
+        loadingEl.style.display = "none";
         document.getElementById("error-message").innerHTML = "<p style='color:red; text-align:center;'>Veri yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>";
       }
     } 
