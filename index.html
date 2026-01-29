@@ -72,14 +72,14 @@
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Mobilde daha çok sığsın diye 160px */
         gap: 15px; 
         width: 100%; 
-        max-width: 1200px; 
+        max-width: 1200px;
         /* Render performansını artırır */
         contain: content;
     }
 
     li { 
         background-color: var(--card-bg); 
-        /* backdrop-filter KALDIRILDI - Mobilde FPS düşürür */
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.08); 
         border-radius: 16px; 
         padding: 10px; 
@@ -91,17 +91,6 @@
         /* GPU hızlandırma için */
         transform: translateZ(0);
         will-change: transform;
-    }
-
-    /* Hover efektlerini sadece mouse kullanan cihazlara sakla */
-    @media (hover: hover) {
-        li:hover { 
-            transform: translateY(-5px); 
-            background-color: #1e293b; 
-            border-color: rgba(255, 255, 255, 0.2); 
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); 
-        }
-        li:hover .avatar-wrapper img { transform: scale(1.05); }
     }
 
     .rank-badge { 
@@ -305,6 +294,7 @@
                     alt="${item.username}" 
                     loading="lazy"
                     width="150" height="150"
+                    onload="adjustImageFit(this)"
                 >
             </div>
             <div class="username">${item.username}</div>
@@ -324,8 +314,30 @@
       }
     } 
 
-    // Sayfa yüklendiğinde çalıştır
-    fetchLeaderboard();
+    let attempts = 0;
+    const maxAttempts = 50; // 5 saniye bekle (50 * 100ms)
+
+    const checkRecaptcha = setInterval(() => {
+        attempts++;
+        // grecaptcha nesnesi tarayıcıya yüklendi mi kontrol et
+        if (typeof grecaptcha !== 'undefined') {
+            clearInterval(checkRecaptcha);
+            console.log("Recaptcha yüklendi, veri çekiliyor...");
+            fetchLeaderboard();
+        } else if (attempts >= maxAttempts) {
+            clearInterval(checkRecaptcha);
+            document.getElementById("error-message").innerHTML = 
+                "<p style='color:red; text-align:center;'>Google Recaptcha yüklenemedi. Lütfen reklam engelleyici (AdBlock) varsa kapatıp sayfayı yenileyin.</p>";
+        }
+    }, 100); // 100ms'de bir kontrol et
+
+    function adjustImageFit(imgElement) {
+        const naturalWidth = imgElement.naturalWidth;
+        const naturalHeight = imgElement.naturalHeight;
+        if (naturalWidth > naturalHeight * 1.3) {
+            imgElement.style.objectFit = 'cover';
+        } 
+    }
   </script>
 </body>
 </html>
