@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puancı Bot Lider tablosu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root { 
+        --bg-color: #1a1614; 
+        --bg-gradient: radial-gradient(circle at 50% 0%, #3a2e26 0%, #1a1614 100%);
+        --card-bg: #221d19; 
+        --card-border: rgba(214, 175, 55, 0.2);
+        --text-color: #e8e4d9; 
+        --text-muted: #a39a8e;
+        --gold: #d4af37; 
+        --silver: #b0b0b0; 
+        --bronze: #cd7f32; 
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { 
+        font-family: 'Outfit', sans-serif; 
+        background-color: var(--bg-color); 
+        background-image: var(--bg-gradient);
+        color: var(--text-color); 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        min-height: 100vh; 
+        padding: 40px 15px;
+    }
+
+    header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .header-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 10px;
+        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+    }
+
+    h1 { 
+        font-family: 'Playfair Display', serif;
+        font-weight: 800; 
+        font-size: 2.5rem; 
+        letter-spacing: 1px; 
+        text-align: center; 
+        color: var(--gold);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        margin-bottom: 5px;
+    }
+
+    .info-text { 
+        color: var(--text-muted); 
+        font-size: 0.9rem; 
+        text-align: center; 
+        max-width: 600px; 
+        font-weight: 300; 
+        font-style: italic;
+    }
+
+    .search-container {
+        width: 100%;
+        max-width: 450px;
+        position: relative;
+        margin-bottom: 40px;
+        z-index: 10;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        color: var(--text-muted);
+        pointer-events: none;
+        transition: color 0.3s;
+        z-index: 2;
+    }
+
+    #username-search { 
+        width: 100%; 
+        padding: 14px 15px 14px 45px; 
+        border: 1px solid var(--card-border); 
+        border-radius: 25px; 
+        background-color: #171311; 
+        color: var(--text-color); 
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem; 
+        outline: none; 
+        transition: all 0.3s ease;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        position: relative;
+        z-index: 1;
+    }
+
+    #username-search:focus {
+        border-color: var(--gold);
+        background-color: #1c1714;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2), inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    #username-search:focus ~ .search-icon,
+    #username-search:not(:placeholder-shown) ~ .search-icon {
+        color: var(--gold);
+    }
+
+    ul { 
+        list-style-type: none; 
+        display: grid; 
+        gap: 20px; 
+        width: 100%; 
+        max-width: 1300px; 
+        contain: layout paint;
+    }
+
+    @media (max-width: 599px) { ul { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+    @media (min-width: 600px) and (max-width: 899px) { ul { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 900px) and (max-width: 1199px) { ul { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 1200px) { ul { grid-template-columns: repeat(5, 1fr); } }
+
+    li { 
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border); 
+        border-radius: 12px; 
+        padding: 12px; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        position: relative; 
+        overflow: hidden; 
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        contain: content; 
+    }
+
+    li:hover {
+        border-color: rgba(214, 175, 55, 0.6);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .rank-badge { 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        background: linear-gradient(135deg, #332b25, #14100e);
+        border-right: 1px solid var(--card-border);
+        border-bottom: 1px solid var(--card-border);
+        padding: 8px 16px;
+        border-bottom-right-radius: 12px; 
+        font-family: 'Playfair Display', serif;
+        font-weight: 800; 
+        font-size: 1.2rem;
+        color: var(--text-color); 
+        z-index: 10; 
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .avatar-wrapper { 
+        position: relative; 
+        width: 100%; 
+        height: 150px; 
+        border-radius: 8px; 
+        overflow: hidden; 
+        margin-bottom: 12px; 
+        display: flex; 
+        justify-content: center; 
+        align-items: flex-end; 
+        background-color: #110e0c; 
+        background: 
+            linear-gradient(to top, rgb(120 120 120 / 95%) 0%, rgb(0 0 0 / 60%) 100%),
+            url(https://cdn2.wolvesville.com/backgrounds/bp32_background_small_night@2x.png) center / cover no-repeat;
+        cursor: pointer; 
+    }
+
+    .avatar-wrapper img { 
+        position: absolute; 
+        bottom: 0; 
+        width: auto;
+        height: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7)); 
+    }
+
+    .avatar-wrapper.wide img { object-fit: cover; }
+
+    .username { 
+        font-weight: 600; 
+        font-size: 1.1rem; 
+        margin-bottom: 8px; 
+        text-align: center; 
+        white-space: nowrap; 
+        overflow: hidden; 
+        text-overflow: ellipsis; 
+        max-width: 100%; 
+        color: var(--text-color);
+        letter-spacing: 0.5px;
+    }
+
+    .timestamp {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        text-align: right;
+    }
+
+    .score { 
+        font-size: 0.9rem; 
+        color: var(--gold); 
+        background: rgba(212, 175, 55, 0.08); 
+        padding: 6px 10px; 
+        border-radius: 6px; 
+        font-weight: 600; 
+        border: 1px solid rgba(212, 175, 55, 0.2); 
+        width: 100%; 
+        text-align: center; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+
+    li.rank-1 { border-color: rgba(212, 175, 55, 0.6); background: linear-gradient(145deg, rgba(212, 175, 55, 0.15), var(--card-bg)); }
+    li.rank-1:hover { border-color: rgba(212, 175, 55, 1); box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3); }
+    li.rank-1 .rank-badge { color: var(--gold); } 
+    li.rank-1 .score { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); color: var(--gold); }
+
+    li.rank-2 { border-color: rgba(176, 176, 176, 0.4); } 
+    li.rank-2:hover { border-color: rgba(176, 176, 176, 0.9); box-shadow: 0 8px 20px rgba(176, 176, 176, 0.2); }
+    li.rank-2 .rank-badge { color: var(--silver); }
+    li.rank-2 .score { color: var(--silver); border-color: rgba(176, 176, 176, 0.4); background: rgba(176, 176, 176, 0.1); }
+
+    li.rank-3 { border-color: rgba(205, 127, 50, 0.4); } 
+    li.rank-3:hover { border-color: rgba(205, 127, 50, 0.9); box-shadow: 0 8px 20px rgba(205, 127, 50, 0.2); }
+    li.rank-3 .rank-badge { color: var(--bronze); }
+    li.rank-3 .score { color: var(--bronze); border-color: rgba(205, 127, 50, 0.4); background: rgba(205, 127, 50, 0.1); }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(10, 8, 7, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background-color: #1a1614;
+        border: 1px solid var(--gold);
+        border-radius: 16px;
+        padding: 30px;
+        width: 90%;
+        max-width: 750px;
+        position: relative;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 20px rgba(214, 175, 55, 0.15);
+        transform: translateY(20px) scale(0.95);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .modal-overlay.active .modal-content {
+        transform: translateY(0) scale(1);
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.8rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: color 0.2s;
+        line-height: 1;
+        z-index: 2;
+    }
+
+    .modal-close:hover { color: var(--gold); }
+
+    .modal-avatar-container {
+        width: 100%;
+        max-width: 240px;
+        max-height: 300px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: linear-gradient(to top, rgb(120 120 120 / 95%) 0%, rgb(0 0 0 / 60%) 100%), url(https://cdn2.wolvesville.com/backgrounds/bp32_background_small_night@2x.png) center / cover;
+        border: 2px solid var(--gold);
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        flex-shrink: 0;
+    }
+
+    .modal-avatar-container img {
+        height: 95%;
+        width: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7));
+    }
+
+    .modal-info-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .modal-username {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        color: var(--text-color);
+        margin-bottom: 5px;
+        word-break: break-word;
+        line-height: 1.1;
+    }
+
+    .modal-score {
+        font-size: 1.3rem;
+        color: var(--gold);
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .modal-date {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+    }
+
+    .modal-comment-box {
+        background: rgba(214, 175, 55, 0.05);
+        border: 1px solid rgba(214, 175, 55, 0.2);
+        border-left: 4px solid var(--gold);
+        padding: 15px 20px;
+        border-radius: 8px;
+        text-align: left;
+        width: 100%;
+        display: none; 
+    }
+
+    .modal-comment-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: var(--gold);
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .modal-comment-text {
+        font-style: italic;
+        color: var(--text-color);
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    @media (min-width: 768px) {
+        .modal-content {
+            flex-direction: row;
+            align-items: stretch;
+            text-align: left;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        .modal-avatar-container {
+            width: 220px;
+            margin-bottom: 0;
+        }
+
+        .modal-info-wrapper {
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .modal-score {
+            justify-content: flex-start;
+        }
+    }
+
+    #loading {
+        display: none;
+        margin: 20px 0;
+        color: var(--gold);
+        font-weight: 400;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        font-style: italic;
+        text-align: center;
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+
+    .footer-text {
+        margin-top: 40px;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-align: center;
+    }
+    .footer-text a { color: var(--gold); text-decoration: none; transition: opacity 0.2s; }
+    .footer-text a:hover { opacity: 0.7; }
+
+    .grecaptcha-badge { visibility: hidden; }
+  </style>
+</head>
+<body>
+  
+  <header>
+    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+        <path d="M4 22h16"></path>
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+    </svg>
+    <h1>Hall of Fame</h1>
+    <p class="info-text">Puanlar gerçek zamanlı güncellenir. 22.12.2025 sonrası normal mod puanlamalar geçerlidir.</p>
+  </header>
+
+  <div class="search-container">
+    <input type="text" id="username-search" value="" placeholder="Oyuncu adı ara..." autocomplete="off">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+  </div>
+
+  <div id="error-message"></div>
+  <div id="loading">Yükleniyor...</div>
+
+  <ul id="lb"></ul>
+
+  <div class="footer-text">
+      This site is protected by reCAPTCHA and the Google 
+      <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a> and
+      <a href="https://policies.google.com/terms" target="_blank">Terms of Service</a> apply.
+  </div>
+
+  <div class="modal-overlay" id="playerModal">
+      <div class="modal-content">
+          <span class="modal-close" onclick="closeModal()">&times;</span>
+          
+          <div class="modal-avatar-container">
+              <img id="modalAvatar" src="" alt="Avatar">
+          </div>
+          
+          <div class="modal-info-wrapper">
+              <div class="modal-username" id="modalUsername"></div>
+              <div class="modal-score" id="modalScore"></div>
+              <div class="modal-date" id="modalDate"></div>
+              
+              <div class="modal-comment-box" id="modalCommentBox">
+                  <div class="modal-comment-title">Yapay Zeka Yorumu</div>
+                  <div class="modal-comment-text" id="modalCommentText"></div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script src="https://www.google.com/recaptcha/api.js?render=6Le8zVQsAAAAAB6Uv1mK37EFTqW8sKgKzFU2RsIU" async defer></script>
+  
+  <script>
+    const API_URL = "https://bbb.puancibot.workers.dev/leaderboard";
+    const SITE_KEY = "6Le8zVQsAAAAAB6Uv1mK37EFTqW8sKgKzFU2RsIU";
+    const starIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+    
+    let currentLeaderboardData = [];
+
+    async function getCaptchaToken(action = "api_call") {
+      return new Promise((resolve, reject) => {
+        if (typeof grecaptcha === 'undefined') { reject("reCAPTCHA yüklenmedi."); return; }
+        grecaptcha.ready(() => {
+          grecaptcha.execute(SITE_KEY, { action })
+            .then(token => resolve(token))
+            .catch(err => reject(err));
+        });
+      });
+    }
+
+    function getRelativeTime(pastTimestamp) {
+      const diff = Date.now() - pastTimestamp;
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+      if (days > 0) return `${days} gün önce`;
+      if (hours > 0) return `${hours} saat önce`;
+      if (minutes > 0) return `${minutes} dakika önce`;
+      return `${seconds} saniye önce`;
+    }
+
+    function openModal(index) {
+        const item = currentLeaderboardData[index];
+        if (!item) return;
+
+        document.getElementById('modalAvatar').src = item.avatarUrl.replace('2x', '3x');
+        document.getElementById('modalUsername').textContent = item.username;
+        document.getElementById('modalScore').innerHTML = `${starIcon} ${item.score} PUAN`;
+        
+        const dateObj = new Date(item.createdAt);
+        document.getElementById('modalDate').textContent = `Puanlama: ${dateObj.toLocaleString('tr-TR')}`;
+
+        const commentBox = document.getElementById('modalCommentBox');
+        if (item.comment && item.comment.trim() !== "") {
+            document.getElementById('modalCommentText').textContent = `"${item.comment}"`;
+            commentBox.style.display = 'block';
+        } else {
+            commentBox.style.display = 'none';
+        }
+
+        const modal = document.getElementById('playerModal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('active'), 10);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('playerModal');
+        modal.classList.remove('active');
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('playerModal');
+        if (event.target == modal) closeModal();
+    }
+
+    const searchInput = document.getElementById('username-search');
+    
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        const val = searchInput.value.trim();
+        const newUrl = window.location.pathname + (val ? "?q=" + encodeURIComponent(val) : "");
+        searchInput.blur();
+        window.history.pushState({ path: newUrl }, '', newUrl);
+        fetchLeaderboard(val);
+      }
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialQuery = urlParams.get('q') || "";
+    if (initialQuery) searchInput.value = initialQuery;
+
+    async function fetchLeaderboard(searchQuery = "") {
+      const loadingEl = document.getElementById("loading");
+      const ul = document.getElementById("lb");
+      const errorMessage = document.getElementById("error-message");
+      
+      loadingEl.style.display = "block";
+      errorMessage.innerHTML = "";
+      ul.style.opacity = "0.4";
+
+      try {
+        const token = await getCaptchaToken("send_message");
+        const fetchUrl = API_URL + (searchQuery ? "?q=" + encodeURIComponent(searchQuery) : "");
+
+        const response = await fetch(fetchUrl, {
+            method: "GET",
+            headers: { "Content-Type": "application/json", "X-Captcha-Token": token }
+        });
+
+        if (!response.ok) throw new Error("Sunucu ile iletişim kurulamadı.");
+
+        const data = await response.json();
+        currentLeaderboardData = data;
+        const fragment = document.createDocumentFragment();
+
+        if (data.length === 0) {
+           errorMessage.innerHTML = "<p style='color:var(--gold); text-align:center;'>Bu kullanıcı adı için kayıt bulunamadı.</p>";
+        } else {
+            data.forEach((item, index) => {
+              const li = document.createElement("li");
+              const rank = index + 1;
+              if (rank === 1) li.className = "rank-1";
+              else if (rank === 2) li.className = "rank-2";
+              else if (rank === 3) li.className = "rank-3";
+
+              li.innerHTML = `
+                <div class="rank-badge">#${rank}</div>
+                <div class="avatar-wrapper" onclick="openModal(${index})" title="Detayları görmek için tıkla">
+                    <img src="${item.avatarUrl}" alt="${item.username}" loading="lazy">
+                </div> 
+                <div class="username" title="${item.username}">${item.username}</div>
+                <div class="timestamp" title="${new Date(item.createdAt).toLocaleString('tr-TR')}">${getRelativeTime(item.createdAt)}</div>
+                <div class="score">${starIcon} ${item.score} PUAN</div>
+              `;
+
+              const img = li.querySelector("img");
+              img.onload = function() {
+                  if (this.naturalWidth > this.naturalHeight * 1.3) {
+                      this.parentElement.classList.add("wide");
+                  }
+              };
+              
+              fragment.appendChild(li);
+            });
+        }
+
+        ul.innerHTML = "";
+        ul.appendChild(fragment);
+
+      } catch (err) {
+        console.error("Hata:", err);
+        errorMessage.innerHTML = "<p style='color:#cd7f32; text-align:center;'>Veri okunamadı. Lütfen tekrar deneyin.</p>";
+      } finally {
+        loadingEl.style.display = "none";
+        ul.style.opacity = "1";
+      }
+    }
+
+    let attempts = 0;
+    const checkRecaptcha = setInterval(() => {
+        attempts++;
+        if (typeof grecaptcha !== 'undefined') {
+            clearInterval(checkRecaptcha);
+            fetchLeaderboard(initialQuery);
+        } else if (attempts >= 50) {
+            clearInterval(checkRecaptcha);
+            document.getElementById("error-message").innerHTML = 
+                "<p style='color:#cd7f32; text-align:center;'>reCAPTCHA başlatılamadı. Reklam engelleyicinizi kontrol edin.</p>";
+        }
+    }, 100);
+  </script>
+</body>
+</html>
